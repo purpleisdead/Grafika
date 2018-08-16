@@ -266,6 +266,7 @@ namespace KomputarnaGrafika
             PanelDefault();
         }
 
+        // test
         private void PanelDefault()
         {
             FillColorDialog.Color = Color.White;
