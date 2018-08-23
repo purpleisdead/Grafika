@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace KomputarnaGrafika.Model
 {
+    [Serializable]
     class ElipseFigure : Figure
     {
         public ElipseFigure(RectangleF rectF, Pen pen)
@@ -15,6 +16,14 @@ namespace KomputarnaGrafika.Model
             this.RectF = rectF;
             this.Pen = pen;
             this.Matrix = new Matrix();
+            this.Name = "Elipse";
+        }
+
+        public ElipseFigure(RectangleF rectF, Pen pen, Matrix matrix)
+        {
+            this.RectF = rectF;
+            this.Pen = pen;
+            this.Matrix = matrix;
             this.Name = "Elipse";
         }
 
@@ -39,7 +48,7 @@ namespace KomputarnaGrafika.Model
             firstMatrix.Multiply(this.Matrix, MatrixOrder.Prepend);
             grfx.Transform = firstMatrix;
             grfx.DrawEllipse(this.Pen, this.RectF.X, this.RectF.Y, this.RectF.Width, this.RectF.Height);
-           // grfx.Transform = secondMatrix;
+            // grfx.Transform = secondMatrix;
         }
     }
 }

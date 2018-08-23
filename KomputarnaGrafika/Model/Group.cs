@@ -8,6 +8,7 @@ using System.Drawing.Drawing2D;
 
 namespace KomputarnaGrafika.Model
 {
+    [Serializable]
     class Group : Figure
     {
         public List<Figure> GroupedFigures { get; set; }
@@ -18,6 +19,7 @@ namespace KomputarnaGrafika.Model
             foreach (var figure in figures)
             {
                 this.GroupedFigures.Add(figure);
+                figure.IsSelected = false;
             }
 
             this.Pen = new Pen(Color.Black, 1f);
@@ -129,5 +131,26 @@ namespace KomputarnaGrafika.Model
 
             this.RectF = new RectangleF(minX, minY, Math.Abs(maxX - minX), Math.Abs(maxY - minY));
         }
+
+        public override void Serialize()
+        {
+            base.Serialize();
+
+            foreach (var figure in this.GroupedFigures)
+            {
+                figure.Serialize();
+            }
+        }
+
+        public override void Deserialize()
+        {
+            base.Deserialize();
+
+            foreach (var figure in this.GroupedFigures)
+            {
+                figure.Deserialize();
+            }
+        }
+
     }
 }

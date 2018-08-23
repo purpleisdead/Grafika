@@ -5,16 +5,33 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using KomputarnaGrafika.Model;
 
 namespace KomputarnaGrafika
 {
-    class Figure
+    [Serializable]
+    public class Figure
     {
+        public SerializableFigure SerializedFigure { get; set; }
+
         public bool IsSelected { get; set; }
-        public RectangleF RectF { get; set; }
-        public Color Color { get; set; }
-        public Pen Pen { get; set; }
-        public Matrix Matrix { get; set; }
+
+        [NonSerialized]
+        public RectangleF rectF;
+        public RectangleF RectF { get { return this.rectF; } set { this.rectF = value; } }
+
+        [NonSerialized]
+        public Color color;
+        public Color Color { get { return this.color; } set { this.color = value; } }
+
+        [NonSerialized]
+        public Pen pen = null;
+        public Pen Pen { get { return this.pen; } set { this.pen = value; } }
+
+        [NonSerialized]
+        public Matrix matrix = null;
+        public Matrix Matrix { get { return this.matrix; } set { this.matrix = value; } }
+
         public string Name { get; set; }
 
 
@@ -25,7 +42,6 @@ namespace KomputarnaGrafika
 
         public virtual void Draw(Graphics grfx)
         {
-
         }
 
         public virtual void ChangePenColor(Color color)
@@ -94,6 +110,26 @@ namespace KomputarnaGrafika
             RectangleF bounds = new RectangleF(minx, miny, (maxx - minx), (maxy - miny));
 
             return bounds;
+        }
+
+        public virtual void Serialize()
+        {
+            this.SerializedFigure = new SerializableFigure();
+            this.SerializedFigure.X = this.RectF.X;
+            this.SerializedFigure.Y = this.RectF.Y;
+            this.SerializedFigure.Width = this.RectF.Width;
+            this.SerializedFigure.Height = this.RectF.Height;
+            this.SerializedFigure.PenColor = this.Pen.Color;
+            this.SerializedFigure.PenWidth = this.Pen.Width;
+            this.SerializedFigure.MatrixElements = this.Matrix.Elements;
+        }
+
+        public virtual void Deserialize()
+        {
+            this.Color = (Color)this.SerializedFigure.PenColor;
+            this.Matrix = new Matrix(this.SerializedFigure.MatrixElements[0], this.SerializedFigure.MatrixElements[1], this.SerializedFigure.MatrixElements[2], this.SerializedFigure.MatrixElements[3], this.SerializedFigure.MatrixElements[4], this.SerializedFigure.MatrixElements[5]);
+            this.RectF = new RectangleF(this.SerializedFigure.X, this.SerializedFigure.Y, this.SerializedFigure.Width, this.SerializedFigure.Height);
+            this.Pen = new Pen((Color)this.SerializedFigure.PenColor, this.SerializedFigure.PenWidth);
         }
     }
 }

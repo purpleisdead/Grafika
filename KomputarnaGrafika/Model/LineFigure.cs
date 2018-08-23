@@ -7,11 +7,48 @@ using System.Threading.Tasks;
 
 namespace KomputarnaGrafika.Model
 {
+    [Serializable]
     class LineFigure : Figure
     {
-        public PointF StartPoint { get; set; }
-        public PointF EndPoint { get; set; }
-        
+        //public PointF StartPoint { get; set; }
+        //public PointF EndPoint { get; set; }
+
+        public float StartPointX { get; set; }
+        public float StartPointY { get; set; }
+        public float EndPointX { get; set; }
+        public float EndPointY { get; set; }
+        public object PenColor { get; set; }
+        public float PenWidth { get; set; }
+        public float[] MatrixElements { get; set; }
+
+        [NonSerialized]
+        public PointF _startPoint;
+        public PointF StartPoint
+        {
+            get
+            {
+                return this._startPoint;
+            }
+            set
+            {
+                this._startPoint = value;
+            }
+        }
+
+        [NonSerialized]
+        public PointF _endPoint;
+        public PointF EndPoint
+        {
+            get
+            {
+                return this._endPoint;
+            }
+            set
+            {
+                this._endPoint = value;
+            }
+        }
+
         public LineFigure(PointF startPoint, PointF endPoint, Pen pen)
         {
             this.StartPoint = startPoint;

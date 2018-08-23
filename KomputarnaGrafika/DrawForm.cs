@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,13 +26,13 @@ namespace KomputarnaGrafika
             TotalCustom,
             Select
         }
-        
+
         PointF mouseDownPoint;
         PointF mouseUpPoint;
         PointF mouseMovedPoint;
         FigureType SelectedType = FigureType.Select;
         Pen Pen = new Pen(Color.Black, 1f);
-        
+
         List<Figure> SelectedFigures = new List<Figure>();
         List<Figure> PaintedFigures = new List<Figure>();
 
@@ -39,33 +43,14 @@ namespace KomputarnaGrafika
 
         public void DrawObject(object sender, PaintEventArgs e)
         {
-            ListOfNamesComboBox.ComboBox.Items.Clear();
-            ListOfNamesComboBox.ComboBox.Items.Add("");
-
             foreach (Figure figure in PaintedFigures)
             {
                 figure.Draw(e.Graphics);
                 ListOfNamesComboBox.ComboBox.Items.Add(figure.Name);
             }
-            
-            if (SelectedFigures.Count() == 1)
-            {
-                label4.Text = SelectedFigures[0].Matrix.Elements[0].ToString();
-                label5.Text = SelectedFigures[0].Matrix.Elements[1].ToString();
-                label6.Text = SelectedFigures[0].Matrix.Elements[2].ToString();
-                label7.Text = SelectedFigures[0].Matrix.Elements[3].ToString();
-                label8.Text = SelectedFigures[0].Matrix.Elements[4].ToString();
-                label9.Text = SelectedFigures[0].Matrix.Elements[5].ToString();
 
-                XTextBox.Text = SelectedFigures[0].RectF.X.ToString();
-                YTextBox.Text = SelectedFigures[0].RectF.Y.ToString();
-                HTextBox.Text = SelectedFigures[0].RectF.Height.ToString();
-                WTextBox.Text = SelectedFigures[0].RectF.Width.ToString();
-                panel1.Visible = true;
-            }
-
-
-            SelectedType = FigureType.Select;
+            this.LoadComboBox();
+            this.LoadPanel();
         }
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
@@ -98,17 +83,6 @@ namespace KomputarnaGrafika
                     }
                 }
 
-                //foreach (var figure in PaintedFigures)
-                //{
-                //    if (!figure.IsSelected && figure.IsInside(mouseDownPoint))
-                //    {
-                //        SelectedFigures.Add(figure);
-                //        figure.IsSelected = true;
-                //        panel1.Visible = true;
-                //        break;
-                //    }
-                //}
-
                 if (SelectedFigures.Count == 0)
                 {
                     panel1.Visible = false;
@@ -125,6 +99,7 @@ namespace KomputarnaGrafika
                 }
             }
         }
+        #region
 
         private void pictureBox_MouseMove(object sender, MouseEventArgs e)
         {
@@ -141,7 +116,7 @@ namespace KomputarnaGrafika
                         {
 
                         }
-                        
+
                         figure.Translate(x, y);
                     }
 
@@ -153,7 +128,7 @@ namespace KomputarnaGrafika
                 }
             }
 
-            
+
         }
 
         private void pictureBox_MouseUp(object sender, MouseEventArgs e)
@@ -187,12 +162,10 @@ namespace KomputarnaGrafika
             }
             else
             {
-                
-            }
-            
-        }
 
-        
+            }
+
+        }
 
         private void RectangleButton_Click(object sender, EventArgs e)
         {
@@ -236,9 +209,9 @@ namespace KomputarnaGrafika
 
             foreach (var figure in SelectedFigures)
             {
-                //TODO fill color property
-                pictureBox.Refresh();
+                // TODO IMPLEMENT THIS
             }
+            pictureBox.Refresh();
         }
 
         private void ThicknessNumericUpDown_ValueChanged(object sender, EventArgs e)
@@ -262,11 +235,10 @@ namespace KomputarnaGrafika
                 selectedFigure.IsSelected = false;
             }
             SelectedFigures.Clear();
-            
+
             PanelDefault();
         }
 
-        // test
         private void PanelDefault()
         {
             FillColorDialog.Color = Color.White;
@@ -283,12 +255,69 @@ namespace KomputarnaGrafika
             }
             Pen = new Pen(Color.Black, 1f);
         }
+        #endregion
 
-        private void PanelLoadSelected()
+        private void LoadPanel()
         {
+            if (SelectedFigures.Count() == 1)
+            {
+                label4.Text = SelectedFigures[0].Matrix.Elements[0].ToString();
+                label5.Text = SelectedFigures[0].Matrix.Elements[1].ToString();
+                label6.Text = SelectedFigures[0].Matrix.Elements[2].ToString();
+                label7.Text = SelectedFigures[0].Matrix.Elements[3].ToString();
+                label8.Text = SelectedFigures[0].Matrix.Elements[4].ToString();
+                label9.Text = SelectedFigures[0].Matrix.Elements[5].ToString();
 
+                XTextBox.Text = SelectedFigures[0].RectF.X.ToString();
+                YTextBox.Text = SelectedFigures[0].RectF.Y.ToString();
+                HTextBox.Text = SelectedFigures[0].RectF.Height.ToString();
+                WTextBox.Text = SelectedFigures[0].RectF.Width.ToString();
+                panel1.Visible = true;
+            }
+
+            SelectedType = FigureType.Select;
         }
 
+        private void LoadComboBox()
+        {
+            this.ListOfNamesComboBox.Items.Clear();
+            this.ListOfNamesComboBox.Items.Add("none");
+
+            foreach (Figure figure in this.PaintedFigures)
+            {
+                ListOfNamesComboBox.Items.Add(figure.Name);
+            }
+
+            if (this.SelectedFigures.Count() > 0)
+            {
+                //this.ListOfNamesComboBox.SelectedIndex = indexTest;
+            }
+            else
+            {
+                this.ListOfNamesComboBox.SelectedIndex = 0;
+            }
+        }
+
+        private void ListOfNamesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int selectedIndex = ListOfNamesComboBox.SelectedIndex;
+
+            if (selectedIndex > 0)
+            {
+                this.NameTextBox.Text = this.PaintedFigures[selectedIndex - 1].Name;
+                this.NameTextBox.ReadOnly = false;
+                this.SelectedFigures.Clear();
+                this.SelectedFigures.Add(this.PaintedFigures[selectedIndex - 1]);
+                LoadPanel();
+            }
+            else
+            {
+                this.NameTextBox.Text = "";
+                this.NameTextBox.ReadOnly = true;
+                this.SelectedFigures.Clear();
+            }
+        }
+        #region
         private void Group_Click(object sender, EventArgs e)
         {
             if (SelectedFigures.Count() > 1)
@@ -338,7 +367,7 @@ namespace KomputarnaGrafika
 
         private void RotateValues_ValueChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void RotateButton_Click(object sender, EventArgs e)
@@ -350,24 +379,66 @@ namespace KomputarnaGrafika
 
             this.pictureBox.Refresh();
         }
+        #endregion
 
-        private void ListOfNamesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void saveCtrlSToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int selectedIndex = ListOfNamesComboBox.ComboBox.SelectedIndex;
 
-            if (selectedIndex > 0)
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Bitmap bitMap = new Bitmap(pictureBox.Width, pictureBox.Height);
+            pictureBox.DrawToBitmap(bitMap, pictureBox.ClientRectangle);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif |JPEG Image (.jpeg)|*.jpeg |Png Image (.png)|*.png";
+            saveFileDialog.Title = "Save Image to disk";
+
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(saveFileDialog.FileName))
             {
-                this.NameTextBox.Text = this.PaintedFigures[selectedIndex - 1].Name;
-                this.NameTextBox.ReadOnly = false;
-                this.SelectedFigures.Clear();
-                this.SelectedFigures.Add(this.PaintedFigures[selectedIndex - 1]);
-                this.Refresh();
-            }
-            else
-            {
-                NameTextBox.ReadOnly = true;
-                this.SelectedFigures.Clear();
+                using (Stream stream = File.Open(saveFileDialog.FileName, FileMode.Create))
+                {
+                    string extension = Path.GetExtension(saveFileDialog.FileName).Trim();
+                    ImageFormat imageFormat = null;
+                    switch (extension)
+                    {
+                        case ".bmp":
+                            imageFormat = ImageFormat.Bmp;
+                            break;
+                        case ".png":
+                            imageFormat = ImageFormat.Png;
+                            break;
+                        case ".jpeg":
+                            imageFormat = ImageFormat.Jpeg;
+                            break;
+                        case ".gif":
+                            imageFormat = ImageFormat.Gif;
+                            break;
+                        default:
+                            throw new NotSupportedException("File extension is not supported");
+                    }
+
+                    bitMap.Save(stream, ImageFormat.Png);
+                }
             }
         }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+        
     }
 }

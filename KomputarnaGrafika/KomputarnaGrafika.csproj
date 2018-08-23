@@ -58,6 +58,7 @@
     </Compile>
     <Compile Include="Model\Group.cs" />
     <Compile Include="Model\LineFigure.cs" />
+    <Compile Include="Model\SerializableFigure.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\RectangleFigure.cs" />
