@@ -46,7 +46,7 @@ namespace KomputarnaGrafika
             foreach (Figure figure in PaintedFigures)
             {
                 figure.Draw(e.Graphics);
-                ListOfNamesComboBox.ComboBox.Items.Add(figure.Name);
+                ListOfNamesComboBox.Items.Add(figure.Name);
             }
 
             this.LoadComboBox();
@@ -432,13 +432,51 @@ namespace KomputarnaGrafika
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Binary File|*.bin";
+            saveFileDialog.Title = "Save Image to disk";
 
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(saveFileDialog.FileName))
+            {
+                using (Stream stream = File.Open(saveFileDialog.FileName, FileMode.Create))
+                {
+                    BinaryFormatter bin = new BinaryFormatter();
+
+                    foreach (var figure in PaintedFigures)
+                    {
+                        figure.Serialize();
+                    }
+
+                    bin.Serialize(stream, PaintedFigures);
+                }
+            }
         }
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Binary Files|*.bin";
+            openFileDialog.Title = "Open file to edit";
 
+            if (openFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
+            {
+                this.PaintedFigures.Clear();
+
+                using (Stream stream = File.Open(openFileDialog.FileName, FileMode.Open))
+                {
+                    BinaryFormatter bin = new BinaryFormatter();
+                    var deserializedShapes = (IEnumerable<object>)bin.Deserialize(stream);
+
+                    foreach (var shape in deserializedShapes)
+                    {
+                        Figure newShape = (Figure)shape;
+                        newShape.Deserialize();
+                        this.PaintedFigures.Add(newShape);
+                    }
+                }
+                this.pictureBox.Refresh();
+            }
         }
-        
     }
 }
